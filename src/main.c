@@ -185,17 +185,14 @@ void interrupt_init(){
 
 int main(void)
 {    
-    
     rcc_enable_peripheral_clk(RCC_PERIPHERAL_GPIOA, true);
     rcc_enable_peripheral_clk(RCC_PERIPHERAL_UART0, true);
     rcc_enable_peripheral_clk(RCC_PERIPHERAL_GPIOB, true);  
     uart_log_init();
     interrupt_init();
     //printf("hello world\r\n");
-
     NVIC_EnableIRQ(GPIO_IRQn);
     NVIC_SetPriority(GPIO_IRQn, 2);
-
     uint16_t lora_buf_size ; 
     uint8_t rx_buf[200];
     uint16_t rx_index = 1 ; 
@@ -204,20 +201,7 @@ int main(void)
     uint8_t file =6 ; 
     uint8_t checksum_calculation [6];
     uint8_t specified[10];
-    specified [0]= 0x7E;
-    specified [1]= 0xFF;
-    specified  [2] = 0x06;
-    specified [3] = 0x03;
-    specified [4] = 0x01; 
-    specified [5] = folder;
-    specified [6] = file; 
-    for ( int i = 0 ; i<6;++i){
-        checksum_calculation[i] = specified[i+1];
-    }
-    uint16_t checksumm = calculate_check_sum (checksum_calculation,6);
-    specified[7] = highbyte(checksumm);
-    specified[8] = lowbyte(checksumm)+6;
-    specified[9] = 0xEF;
+    
 
 /*
  ////////////////////////////////////////////////
@@ -227,39 +211,17 @@ int main(void)
    while (uart_get_flag_status(UART0, UART_FLAG_TX_FIFO_EMPTY) != SET);
 }
 
-
-
-
-
-
-
-
-
 /////////////////////////////////////////////////
 
     for ( int i = 0 ; i < 10000;++i);
 
 */
 
-
-
-
-
 uint32_t prevent_bouncing = 0 ; 
-
 uint32_t prevent_bouncing_edge = 120000;
-
-
 uint8_t random_num= 0 ; 
     /* Infinite loop */
-
-
-
     while (1) { 
-
-        
-
-
         if (uart_get_interrupt_status(UART0, UART_INTERRUPT_RX_DONE) == SET||
         uart_get_interrupt_status(UART0, UART_INTERRUPT_RX_TIMEOUT) == SET) 
         {
@@ -268,20 +230,13 @@ uint8_t random_num= 0 ;
               //  printf ( " handle uart normal \n");
             new_data_available=handle_uart_rx(&lora_buf_size,rx_buf,&rx_index);   
     }     
-
-        
                 if ( new_data_available == true ){
                     new_data_available = false ; 
-
-
                   //  printf(" receive happened \n");
                    // printf(" debug ");
                     for ( int i = 1 ; i <= lora_buf_size-2 ; ++i ){
                         printf("%d",rx_buf[i]);
                     }
-
-
-
                 }
             if ( g_gpio_interrupt_flag_A_button ==1 )
             {   
@@ -291,11 +246,37 @@ uint8_t random_num= 0 ;
 
                     random_num++;
                 prevent_bouncing = 0 ;
-                printf(" button a pressed \n");
+               // printf(" button a pressed \n");
                 int result = get_random_unique_embedded();
                 if (result!=-1)
                 {
-                    printf("Random: %d\n", result);
+                 //   printf("Random: %d\n", result);
+                }
+
+                file = result ;
+
+
+                specified [0]= 0x7E;
+                specified [1]= 0xFF;
+                specified  [2] = 0x06;
+                specified [3] = 0x03;
+                specified [4] = 0x01; 
+                specified [5] = folder;
+                specified [6] = file; 
+                for ( int i = 0 ; i<6;++i){
+                    checksum_calculation[i] = specified[i+1];
+                }
+                uint16_t checksumm = calculate_check_sum (checksum_calculation,6);
+                specified[7] = highbyte(checksumm);
+                specified[8] = lowbyte(checksumm)+file;
+                specified[9] = 0xEF;
+
+
+
+                for ( int i = 0 ; i < 10 ; ++i ){
+                    //printf(" %d ",data[i]);
+                    uart_send_data(UART0,specified[i]);
+                   while (uart_get_flag_status(UART0, UART_FLAG_TX_FIFO_EMPTY) != SET);
                 }
                 }   
             }
@@ -308,26 +289,17 @@ uint8_t random_num= 0 ;
                 printf(" button b pressed \n");
                 }  
             }
-            
-
-
+        
             if ( g_gpio_interrupt_flag_C_button ==1 )
-            {   
-               
+            {          
                 g_gpio_interrupt_flag_C_button = 0;
-
-
                 if ( prevent_bouncing == prevent_bouncing_edge)
                 {
                 prevent_bouncing = 0 ;
                 printf(" button c pressed \n");
                 }
-                
             }
-            
-            
-
-            
+                        
             if(prevent_bouncing < prevent_bouncing_edge)
 prevent_bouncing ++;
 
