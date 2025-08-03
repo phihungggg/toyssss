@@ -7,12 +7,13 @@
 #include "tremo_delay.h"
 
 
-
+#include <time.h>
 #define UART_RX_BUF_SIZE 200
 
 
-volatile uint8_t g_gpio_interrupt_flag = 0;
-
+volatile uint8_t g_gpio_interrupt_flag_A_button = 0;
+volatile uint8_t g_gpio_interrupt_flag_B_button = 0;
+volatile uint8_t g_gpio_interrupt_flag_C_button = 0;
 
 gpio_t *g_test_gpiox = GPIOA;
 uint8_t A_BUTTON = GPIO_PIN_9;
@@ -23,6 +24,48 @@ uint8_t flag = 0 ;
 uint8_t highbyte ( uint16_t input  );
 
 uint8_t lowbyte ( uint16_t input );
+
+
+#define SIZE 6
+
+int shuffled_numbers[SIZE];
+int current_index = 0;
+
+
+uint8_t pool_original[SIZE] = {1,2,3,4,5,6};
+
+uint8_t pool[SIZE] = {1, 2, 3, 4, 5, 6};
+uint8_t pool_size = SIZE;
+
+
+uint32_t seed = 12345; 
+
+uint32_t simple_rand()
+{
+    seed = seed * 1103515245 + 12345;
+    return (seed >> 16) & 0x7FFF;
+}
+
+
+
+int get_random_unique_embedded()
+{
+    if (pool_size == 0)
+        return -1; // Không còn số nào
+
+    uint32_t index = simple_rand() % pool_size;
+    int val = pool[index];
+
+    // Loại bỏ phần tử đã dùng bằng cách swap với cuối mảng
+    pool[index] = pool[pool_size - 1];
+    pool_size--;
+
+    return val;
+}
+
+
+
+
 
 bool handle_uart_rx(uint16_t *lora_buf_size,uint8_t *rx_buf,uint16_t *rx_index)
 {
@@ -127,13 +170,13 @@ void interrupt_init(){
 
 // A BUTTON
     gpio_init(g_test_gpiox, A_BUTTON, GPIO_MODE_INPUT_PULL_UP);
-    gpio_config_interrupt(g_test_gpiox, A_BUTTON, GPIO_INTR_FALLING_EDGE);
+    gpio_config_interrupt(g_test_gpiox, A_BUTTON, GPIO_INTR_RISING_EDGE);
     // B BUTTON
     gpio_init(g_test_gpiox, B_BUTTON, GPIO_MODE_INPUT_PULL_UP);
-    gpio_config_interrupt(g_test_gpiox, B_BUTTON, GPIO_INTR_FALLING_EDGE);
+    gpio_config_interrupt(g_test_gpiox, B_BUTTON, GPIO_INTR_RISING_EDGE);
     // C BUTTON
     gpio_init(g_test_gpiox, C_BUTTON, GPIO_MODE_INPUT_PULL_UP);
-    gpio_config_interrupt(g_test_gpiox, C_BUTTON, GPIO_INTR_FALLING_EDGE);
+    gpio_config_interrupt(g_test_gpiox, C_BUTTON, GPIO_INTR_RISING_EDGE);
 }
 
 
@@ -147,7 +190,12 @@ int main(void)
     rcc_enable_peripheral_clk(RCC_PERIPHERAL_UART0, true);
     rcc_enable_peripheral_clk(RCC_PERIPHERAL_GPIOB, true);  
     uart_log_init();
+    interrupt_init();
     //printf("hello world\r\n");
+
+    NVIC_EnableIRQ(GPIO_IRQn);
+    NVIC_SetPriority(GPIO_IRQn, 2);
+
     uint16_t lora_buf_size ; 
     uint8_t rx_buf[200];
     uint16_t rx_index = 1 ; 
@@ -171,7 +219,7 @@ int main(void)
     specified[8] = lowbyte(checksumm)+6;
     specified[9] = 0xEF;
 
-
+/*
  ////////////////////////////////////////////////
  for ( int i = 0 ; i < 10 ; ++i ){
     //printf(" %d ",data[i]);
@@ -191,17 +239,27 @@ int main(void)
 
     for ( int i = 0 ; i < 10000;++i);
 
+*/
 
 
 
 
-uint32_t interval = 0 ; 
+
+uint32_t prevent_bouncing = 0 ; 
+
+uint32_t prevent_bouncing_edge = 120000;
 
 
+uint8_t random_num= 0 ; 
     /* Infinite loop */
+
+
+
     while (1) { 
 
-        interval++;
+        
+
+
         if (uart_get_interrupt_status(UART0, UART_INTERRUPT_RX_DONE) == SET||
         uart_get_interrupt_status(UART0, UART_INTERRUPT_RX_TIMEOUT) == SET) 
         {
@@ -225,9 +283,65 @@ uint32_t interval = 0 ;
 
 
                 }
+            if ( g_gpio_interrupt_flag_A_button ==1 )
+            {   
+                g_gpio_interrupt_flag_A_button = 0;
+                if ( prevent_bouncing == prevent_bouncing_edge)
+                {
+
+                    random_num++;
+                prevent_bouncing = 0 ;
+                printf(" button a pressed \n");
+                int result = get_random_unique_embedded();
+                if (result!=-1)
+                {
+                    printf("Random: %d\n", result);
+                }
+                }   
+            }
+            if ( g_gpio_interrupt_flag_B_button ==1 )
+            {   
+                g_gpio_interrupt_flag_B_button = 0;
+                if ( prevent_bouncing == prevent_bouncing_edge)
+                {
+                prevent_bouncing = 0 ;
+                printf(" button b pressed \n");
+                }  
+            }
+            
 
 
-         
+            if ( g_gpio_interrupt_flag_C_button ==1 )
+            {   
+               
+                g_gpio_interrupt_flag_C_button = 0;
+
+
+                if ( prevent_bouncing == prevent_bouncing_edge)
+                {
+                prevent_bouncing = 0 ;
+                printf(" button c pressed \n");
+                }
+                
+            }
+            
+            
+
+            
+            if(prevent_bouncing < prevent_bouncing_edge)
+prevent_bouncing ++;
+
+            
+
+            if ( random_num == 6){
+                random_num = 0 ; 
+                for ( int i = 0 ; i < SIZE ; ++i){
+                    pool[i] = pool_original[i];
+                }
+                pool_size = SIZE;
+            }
+
+                
     }
 }
 

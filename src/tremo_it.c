@@ -7,9 +7,9 @@
 
 
 
-extern volatile uint8_t g_gpio_interrupt_flag = 0;
-
-
+extern volatile uint8_t g_gpio_interrupt_flag_A_button;
+extern volatile uint8_t g_gpio_interrupt_flag_B_button;
+extern volatile uint8_t g_gpio_interrupt_flag_C_button;
 
 extern uint8_t A_BUTTON ;
 extern uint8_t B_BUTTON ;
@@ -128,19 +128,19 @@ void GPIO_IRQHandler(void)
 {
     if (gpio_get_interrupt_status(GPIOA, A_BUTTON) == SET) {
         gpio_clear_interrupt(GPIOA, A_BUTTON);
-        g_gpio_interrupt_flag = 1;
+        g_gpio_interrupt_flag_A_button = 1;
     }
     
-   else if (gpio_get_interrupt_status(GPIOB, B_BUTTON) == SET) {
-        gpio_clear_interrupt(GPIOB, B_BUTTON);
-        g_gpio_interrupt_flag = 1;
+   else if (gpio_get_interrupt_status(GPIOA, B_BUTTON) == SET) {
+        gpio_clear_interrupt(GPIOA, B_BUTTON);
+        g_gpio_interrupt_flag_B_button = 1;
     }
 
 
 
    else  if (gpio_get_interrupt_status(GPIOA, C_BUTTON) == SET) {
         gpio_clear_interrupt(GPIOA, C_BUTTON);
-        g_gpio_interrupt_flag = 1;
+        g_gpio_interrupt_flag_C_button = 1;
     }
 
 }
