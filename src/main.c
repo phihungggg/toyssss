@@ -26,6 +26,8 @@ uint8_t B_BUTTON = GPIO_PIN_4;
 uint8_t C_BUTTON = GPIO_PIN_5;
 
 
+
+#define BUSY GPIO_LEVEL_LOW
 uint8_t BUSY_SPEAKER_1_PIN = GPIO_PIN_14;
 
 uint8_t BUSY_SPEAKER_2_PIN = GPIO_PIN_15;
@@ -217,7 +219,7 @@ void gptimer_simple_timer(timer_gp_t* TIMERx)
 
     timerx_init.prescaler          = 23999;  //sysclock defaults to 24M, is divided by (prescaler + 1) to 1k
     timerx_init.counter_mode       = TIMER_COUNTERMODE_UP;
-    timerx_init.period             = 20000;   //time period is ((1 / 1k) * 000) 
+    timerx_init.period             = 5000;   //time period is ((1 / 1k) * 000) 
     timerx_init.clock_division     = TIMER_CKD_FPCLK_DIV1;
     timerx_init.autoreload_preload = false;
     timer_init(TIMERx, &timerx_init);
@@ -245,6 +247,11 @@ void gptim0_IRQHandler(void)
 }
 
 
+
+void busy_pin_init () {
+    gpio_init(g_test_gpiox, BUSY_SPEAKER_1_PIN , GPIO_MODE_INPUT_FLOATING);
+    gpio_init(g_test_gpiox, BUSY_SPEAKER_2_PIN , GPIO_MODE_INPUT_FLOATING);
+}
 
 
 
@@ -350,37 +357,6 @@ bool emit_A3 = false;
                 g_gpio_interrupt_flag_A_button = 0;
                 if ( prevent_bouncing == prevent_bouncing_edge)
                 {
-
-            //         random_num_for_A++;
-            //     prevent_bouncing = 0 ;
-            //    // printf(" button a pressed \n");
-            //     int result = get_random_unique_embedded();
-            //     if (result!=-1)
-            //     {
-            //      //   printf("Random: %d\n", result);
-            //     }
-            //     file = result ;
-            //     specified [0]= 0x7E;
-            //     specified [1]= 0xFF;
-            //     specified [2] = 0x06;
-            //     specified [3] = 0x03;
-            //     specified [4] = 0x01; 
-            //     specified [5] = folder;
-            //     specified [6] = file; 
-            //     for ( int i = 0 ; i<6;++i){
-            //         checksum_calculation[i] = specified[i+1];
-            //     }
-            //     uint16_t checksumm = calculate_check_sum (checksum_calculation,6);
-            //     specified[7] = (uint8_t)(checksumm >> 8);   // Checksum High
-            //     specified[8] = (uint8_t)(checksumm & 0xFF); // Checksum Low
-            //     specified[9] = 0xEF;
-            //     for ( int i = 0 ; i < 10 ; ++i ){
-            //         //printf(" %d ",data[i]);
-            //         uart_send_data(UART0,specified[i]);
-            //        while (uart_get_flag_status(UART0, UART_FLAG_TX_FIFO_EMPTY) != SET);
-            //     }
-
-
             prevent_bouncing = 0 ;
                     switch ( gpio_read (GPIOA,A_BUTTON)){
 
@@ -402,7 +378,7 @@ bool emit_A3 = false;
             if ( g_gpio_interrupt_flag_B_button ==1 )
             {   
                 g_gpio_interrupt_flag_B_button = 0;
-                if ( prevent_bouncing == prevent_bouncing_edge && timer_flag == 1)
+                if ( prevent_bouncing == prevent_bouncing_edge && timer_flag == 1 && gpio_read(GPIOA, BUSY_SPEAKER_1_PIN)==!BUSY )
                 {
 
                     timer_flag= 0 ; 
@@ -428,7 +404,7 @@ bool emit_A3 = false;
                 if ( prevent_bouncing == prevent_bouncing_edge)
                 {
                 prevent_bouncing = 0 ;
-                printf(" button c pressed \n");
+               
                 }
             }  
             if(prevent_bouncing < prevent_bouncing_edge)
