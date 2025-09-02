@@ -14,6 +14,13 @@ void SVC_Handler(void);
 void PendSV_Handler(void);
 void SysTick_Handler(void);
 
+
+
+
+void ssp0_IRQHandler(void);
+void ssp1_IRQHandler(void);
+void ssp2_IRQHandler(void);
+
 #ifdef __cplusplus
 }
 #endif

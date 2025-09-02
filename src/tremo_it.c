@@ -6,7 +6,7 @@
 
 
 
-
+extern volatile uint8_t spi1_interrupt_button;
 extern volatile uint8_t g_gpio_interrupt_flag_A_button;
 extern volatile uint8_t g_gpio_interrupt_flag_B_button;
 extern volatile uint8_t g_gpio_interrupt_flag_C_button;
@@ -144,3 +144,16 @@ void GPIO_IRQHandler(void)
     }
 
 }
+
+
+
+
+
+
+
+
+void SSP1_IRQHandler(void)
+{
+    spi1_interrupt_button = 1 ; 
+}
+
