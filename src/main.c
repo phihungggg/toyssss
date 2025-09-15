@@ -193,10 +193,10 @@ void interrupt_init(){
     gpio_config_interrupt(g_test_gpiox, C_BUTTON, GPIO_INTR_RISING_FALLING_EDGE);
     // D BUTTON
     gpio_init(g_test_gpiox, D_BUTTON, GPIO_MODE_INPUT_PULL_UP);
-    gpio_config_interrupt(g_test_gpiox, C_BUTTON, GPIO_INTR_FALLING_EDGE);
+    gpio_config_interrupt(g_test_gpiox, D_BUTTON, GPIO_INTR_FALLING_EDGE);
     // E BUTTON
     gpio_init(g_test_gpiox, E_BUTTON, GPIO_MODE_INPUT_PULL_UP);
-    gpio_config_interrupt(g_test_gpiox, C_BUTTON, GPIO_INTR_FALLING_EDGE);
+    gpio_config_interrupt(g_test_gpiox, E_BUTTON, GPIO_INTR_FALLING_EDGE);
 }
 
 
@@ -432,6 +432,8 @@ int main(void)
                 }
             if ( g_gpio_interrupt_flag_A_button ==1 )
             {   
+
+                printf(" a button pressed \n");
                 g_gpio_interrupt_flag_A_button = 0;
                 if ( prevent_bouncing == prevent_bouncing_edge)
                 {
@@ -439,7 +441,7 @@ int main(void)
         
 
             prevent_bouncing = 0 ;
-            gpio_init(GPIOA,SWITCH_SPEAKER,GPIO_MODE_OUTPUT_PP_LOW);
+            //gpio_init(GPIOA,SWITCH_SPEAKER,GPIO_MODE_OUTPUT_PP_LOW);
 
                     switch ( gpio_read (GPIOA,A_BUTTON)){
 
@@ -472,7 +474,7 @@ int main(void)
                    // timer_cmd(TIMER0, false);
 
 
-                   gpio_init(GPIOA,SWITCH_SPEAKER,GPIO_MODE_OUTPUT_PP_LOW);
+                   //gpio_init(GPIOA,SWITCH_SPEAKER,GPIO_MODE_OUTPUT_PP_LOW);
 
                
                    switch (gpio_read(GPIOA, B_BUTTON)) {
@@ -580,65 +582,65 @@ int main(void)
 
             }  
 
-            if ( g_gpio_interrupt_flag_D_button ==1 ){
-                g_gpio_interrupt_flag_D_button = 0 ; 
+            // if ( g_gpio_interrupt_flag_D_button ==1 ){
+            //     g_gpio_interrupt_flag_D_button = 0 ; 
 
-                if ( prevent_bouncing == prevent_bouncing_edge && what_kind_of_music_is_playing != E_TYPE)
-                {
-
-
-                    gpio_init(GPIOA,SWITCH_SPEAKER,GPIO_MODE_OUTPUT_PP_HIGH);
-                    delay_us(10);
-
-                    uint8_t data[] = {1,2,3,4,5,6,7,8,9,10};
-
-                    memcpy(album,data,sizeof(data));
-
-                    phat_nhac_theo_folder(album[current_song],2);
-
-                    current_D_song ++;
-
-                    if (current_D_song == 10 ){
-
-                        current_D_song = 0 ; 
-                    }
-                    what_kind_of_music_is_playing = D_TYPE;
-                    prevent_bouncing = 0 ; 
-                }
-
-            }
+            //     if ( prevent_bouncing == prevent_bouncing_edge && what_kind_of_music_is_playing != E_TYPE)
+            //     {
 
 
-            if (g_gpio_interrupt_flag_E_button ==1 ){
-                g_gpio_interrupt_flag_E_button = 0 ; 
-                if ( prevent_bouncing == prevent_bouncing_edge)
-                {
-                    gpio_init(GPIOA,SWITCH_SPEAKER,GPIO_MODE_OUTPUT_PP_HIGH);
-                    delay_us(10);
-                    if ( (gpio_read(GPIOA, BUSY_SPEAKER_1_PIN) == BUSY))
-                    {
+            //         gpio_init(GPIOA,SWITCH_SPEAKER,GPIO_MODE_OUTPUT_PP_HIGH);
+            //         delay_us(10);
+
+            //         uint8_t data[] = {1,2,3,4,5,6,7,8,9,10};
+
+            //         memcpy(album,data,sizeof(data));
+
+            //         phat_nhac_theo_folder(album[current_song],2);
+
+            //         current_D_song ++;
+
+            //         if (current_D_song == 10 ){
+
+            //             current_D_song = 0 ; 
+            //         }
+            //         what_kind_of_music_is_playing = D_TYPE;
+            //         prevent_bouncing = 0 ; 
+            //     }
+
+            // }
+
+
+            // if (g_gpio_interrupt_flag_E_button ==1 ){
+            //     g_gpio_interrupt_flag_E_button = 0 ; 
+            //     if ( prevent_bouncing == prevent_bouncing_edge)
+            //     {
+            //         gpio_init(GPIOA,SWITCH_SPEAKER,GPIO_MODE_OUTPUT_PP_HIGH);
+            //         delay_us(10);
+            //         if ( (gpio_read(GPIOA, BUSY_SPEAKER_1_PIN) == BUSY))
+            //         {
                    
 
-                        lam_gi_thi_lam(0x0E,0,0); //pause
+            //             lam_gi_thi_lam(0x0E,0,0); //pause
                         
 
                     
-                    }
+            //         }
 
-                    uint8_t data[] = {1,2,3,4,5,6,0,0,0,0};
+            //         uint8_t data[] = {1,2,3,4,5,6,0,0,0,0};
 
-                    memcpy(album,data,sizeof(data));
-                    phat_nhac_theo_folder(current_E_song,3);
-                    current_E_song++;
-                    if ( current_E_song ==6){
-                        current_E_song = 0 ; 
-                    }
+            //         memcpy(album,data,sizeof(data));
+            //         phat_nhac_theo_folder(current_E_song,3);
+            //         current_E_song++;
+            //         if ( current_E_song ==6){
+            //             current_E_song = 0 ; 
+            //         }
                     
-                    what_kind_of_music_is_playing = E_TYPE;
-                    prevent_bouncing = 0 ; 
-                }
+            //         what_kind_of_music_is_playing = E_TYPE;
+            //         prevent_bouncing = 0 ; 
+            //     }
 
-            }
+            // }
 
 
             if(prevent_bouncing < prevent_bouncing_edge)
