@@ -51,14 +51,14 @@ uint8_t D_BUTTON = GPIO_PIN_6;
 uint8_t E_BUTTON = GPIO_PIN_8;
 
 
-uint8_t SWITCH_SPEAKER = GPIO_PIN_7;
+uint8_t SWITCH_SPEAKER = GPIO_PIN_15;
 
 
 
 
 uint8_t BUSY_SPEAKER_1_PIN = GPIO_PIN_14;
 
-uint8_t BUSY_SPEAKER_2_PIN = GPIO_PIN_15;
+//uint8_t BUSY_SPEAKER_2_PIN = GPIO_PIN_15;
 
 
 uint8_t flag = 0 ; 
@@ -395,7 +395,7 @@ int main(void)
 
         gpio_init(GPIOA,BUSY_SPEAKER_1_PIN,GPIO_MODE_INPUT_FLOATING);
         gpio_init(GPIOA,SWITCH_SPEAKER,GPIO_MODE_OUTPUT_PP_LOW);
-        gpio_init(GPIOA,BUSY_SPEAKER_2_PIN,GPIO_MODE_INPUT_FLOATING);
+        //gpio_init(GPIOA,BUSY_SPEAKER_2_PIN,GPIO_MODE_INPUT_FLOATING);
 
 
 
@@ -441,7 +441,7 @@ int main(void)
         
 
             prevent_bouncing = 0 ;
-            //gpio_init(GPIOA,SWITCH_SPEAKER,GPIO_MODE_OUTPUT_PP_LOW);
+            gpio_init(GPIOA,SWITCH_SPEAKER,GPIO_MODE_OUTPUT_PP_LOW);
 
                     switch ( gpio_read (GPIOA,A_BUTTON)){
 
@@ -474,7 +474,7 @@ int main(void)
                    // timer_cmd(TIMER0, false);
 
 
-                   //gpio_init(GPIOA,SWITCH_SPEAKER,GPIO_MODE_OUTPUT_PP_LOW);
+                   gpio_init(GPIOA,SWITCH_SPEAKER,GPIO_MODE_OUTPUT_PP_LOW);
 
                
                    switch (gpio_read(GPIOA, B_BUTTON)) {
@@ -562,9 +562,9 @@ int main(void)
 
 
                             
-                            gpio_init(GPIOA,SWITCH_SPEAKER,GPIO_MODE_OUTPUT_PP_LOW);
+                            gpio_init(GPIOA,SWITCH_SPEAKER,GPIO_MODE_OUTPUT_PP_HIGH);
 
-
+                       
                             what_kind_of_music_is_playing= C_TYPE;
                             current_song ++;
                             if ( current_song == 5)
