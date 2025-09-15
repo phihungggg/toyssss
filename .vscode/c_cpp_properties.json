@@ -1,0 +1,23 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "/home/hung/Desktop/lora-repo/AI-THINKER-NEWVERSION/Ai-Thinker-LoRaWAN-Ra-08-new_backup/build/**",
+
+                "/home/hung/Desktop/lora-repo/AI-THINKER-NEWVERSION/Ai-Thinker-LoRaWAN-Ra-08-new_backup/drivers/**",
+                "/home/hung/Desktop/lora-repo/AI-THINKER-NEWVERSION/Ai-Thinker-LoRaWAN-Ra-08-new_backup/lora/**",
+                "/home/hung/Desktop/lora-repo/AI-THINKER-NEWVERSION/Ai-Thinker-LoRaWAN-Ra-08-new_backup/platform/**",
+                "/home/hung/Desktop/lora-repo/AI-THINKER-NEWVERSION/Ai-Thinker-LoRaWAN-Ra-08-new_backup/png/**",
+                "/home/hung/Desktop/lora-repo/AI-THINKER-NEWVERSION/Ai-Thinker-LoRaWAN-Ra-08-new_backup/tools/**"
+            ],
+            "defines": [],
+            "compilerPath": "/usr/bin/gcc",
+            "cStandard": "c17",
+            "cppStandard": "gnu++17",
+            "intelliSenseMode": "linux-gcc-x64"
+        }
+    ],
+    "version": 4
+}

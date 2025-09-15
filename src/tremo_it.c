@@ -157,3 +157,7 @@ void SSP1_IRQHandler(void)
     spi1_interrupt_button = 1 ; 
 }
 
+void TIMER0_IRQHandler(void)
+{
+    gptim0_IRQHandler();
+}
