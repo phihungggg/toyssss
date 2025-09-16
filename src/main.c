@@ -20,6 +20,7 @@ B_TYPE,
 C_TYPE,
 D_TYPE,
 E_TYPE,
+REST_TYPE,
 }which_type_of_music;
 
 
@@ -51,14 +52,14 @@ uint8_t D_BUTTON = GPIO_PIN_6;
 uint8_t E_BUTTON = GPIO_PIN_8;
 
 
-uint8_t SWITCH_SPEAKER = GPIO_PIN_15;
+uint8_t SWITCH_SPEAKER = GPIO_PIN_7;
 
 
 
 
 uint8_t BUSY_SPEAKER_1_PIN = GPIO_PIN_14;
 
-//uint8_t BUSY_SPEAKER_2_PIN = GPIO_PIN_15;
+uint8_t BUSY_SPEAKER_2_PIN = GPIO_PIN_15;
 
 
 uint8_t flag = 0 ; 
@@ -345,7 +346,10 @@ int main(void)
     rcc_enable_peripheral_clk(RCC_PERIPHERAL_TIMER0, true);
 
 
-
+    
+    gpio_set_iomux(GPIOA,GPIO_PIN_6,0);
+    gpio_set_iomux(GPIOA,GPIO_PIN_8,0);
+    gpio_set_iomux(GPIOA,GPIO_PIN_7,0);
     // timer setup
     gptimer_simple_timer(TIMER0);
      NVIC_SetPriority(TIMER0_IRQn, 1);
@@ -366,14 +370,19 @@ int main(void)
 
 
     uint32_t prevent_bouncing = 0 ; 
-    uint32_t prevent_bouncing_edge = 50000;
+    uint32_t prevent_bouncing_edge = 10000;
 
 
 
 
 
-
-
+    uint32_t prevent_bouncing_A = 0 ;
+    uint32_t prevent_bouncing_B = 0 ;
+    uint32_t prevent_bouncing_C = 0 ;
+    uint32_t prevent_bouncing_D = 0 ;
+    uint32_t prevent_bouncing_E = 0 ;
+    
+    
 
     bool allow_B_BUTTON_Works= false;
         
@@ -395,8 +404,10 @@ int main(void)
 
         gpio_init(GPIOA,BUSY_SPEAKER_1_PIN,GPIO_MODE_INPUT_FLOATING);
         gpio_init(GPIOA,SWITCH_SPEAKER,GPIO_MODE_OUTPUT_PP_LOW);
-        //gpio_init(GPIOA,BUSY_SPEAKER_2_PIN,GPIO_MODE_INPUT_FLOATING);
-
+        gpio_init(GPIOA,BUSY_SPEAKER_2_PIN,GPIO_MODE_INPUT_FLOATING);
+       
+       
+        phat_nhac(1);
 
 
       // CONFIG BUSY_SPEAKER_2
@@ -435,12 +446,12 @@ int main(void)
 
                 printf(" a button pressed \n");
                 g_gpio_interrupt_flag_A_button = 0;
-                if ( prevent_bouncing == prevent_bouncing_edge)
+                if ( prevent_bouncing_A == prevent_bouncing_edge)
                 {
 
         
 
-            prevent_bouncing = 0 ;
+            prevent_bouncing_A = 0 ;
             gpio_init(GPIOA,SWITCH_SPEAKER,GPIO_MODE_OUTPUT_PP_LOW);
 
                     switch ( gpio_read (GPIOA,A_BUTTON)){
@@ -464,13 +475,13 @@ int main(void)
             {   
                 g_gpio_interrupt_flag_B_button = 0;
                // printf(" does interrupt b button \n");
-                if ( prevent_bouncing == prevent_bouncing_edge  && allow_B_BUTTON_Works == true ) //&&gpio_read(GPIOA, BUSY_SPEAKER_1_PIN)!=BUSY )
+                if ( prevent_bouncing_B == prevent_bouncing_edge  && allow_B_BUTTON_Works == true ) //&&gpio_read(GPIOA, BUSY_SPEAKER_1_PIN)!=BUSY )
                 {
 
                     if ( (what_kind_of_music_is_playing != A_TYPE) || 
                     (gpio_read(GPIOA, BUSY_SPEAKER_1_PIN) != BUSY) ) 
                {
-                   prevent_bouncing = 0;
+                   prevent_bouncing_B = 0;
                    // timer_cmd(TIMER0, false);
 
 
@@ -503,7 +514,7 @@ int main(void)
             {         
 
                 g_gpio_interrupt_flag_C_button = 0;
-                if ( prevent_bouncing == prevent_bouncing_edge)
+                if ( prevent_bouncing_C == prevent_bouncing_edge)
                 {
                     if  (what_kind_of_music_is_playing!= A_TYPE && what_kind_of_music_is_playing !=B_TYPE|| (gpio_read(GPIOA, BUSY_SPEAKER_1_PIN) != BUSY)   )
                     {
@@ -562,7 +573,7 @@ int main(void)
 
 
                             
-                            gpio_init(GPIOA,SWITCH_SPEAKER,GPIO_MODE_OUTPUT_PP_HIGH);
+                            gpio_init(GPIOA,SWITCH_SPEAKER,GPIO_MODE_OUTPUT_PP_LOW);
 
                        
                             what_kind_of_music_is_playing= C_TYPE;
@@ -571,7 +582,7 @@ int main(void)
                                 current_song = 0 ;         
                                 break;
                         }
-                prevent_bouncing = 0 ;
+                prevent_bouncing_C = 0 ;
                     }
 
 
@@ -582,70 +593,88 @@ int main(void)
 
             }  
 
-            // if ( g_gpio_interrupt_flag_D_button ==1 ){
-            //     g_gpio_interrupt_flag_D_button = 0 ; 
+            if ( g_gpio_interrupt_flag_D_button ==1 ){
+                g_gpio_interrupt_flag_D_button = 0 ; 
 
-            //     if ( prevent_bouncing == prevent_bouncing_edge && what_kind_of_music_is_playing != E_TYPE)
-            //     {
+                if ( prevent_bouncing_D == prevent_bouncing_edge && what_kind_of_music_is_playing != E_TYPE)
+                {
+                    printf(" D button pressed \n");
+                    gpio_init(GPIOA,SWITCH_SPEAKER,GPIO_MODE_OUTPUT_PP_HIGH);
+                    delay_us(10);
+
+                    uint8_t data[] = {1,2,3,4,5,6,7,8,9,10};
+
+                    memcpy(album,data,sizeof(data));
+
+                    phat_nhac_theo_folder(album[current_D_song],2);
+
+                    current_D_song ++;
+
+                    if (current_D_song == 10 ){
+
+                        current_D_song = 0 ; 
+                    }
+                    what_kind_of_music_is_playing = D_TYPE;
+                    prevent_bouncing_D = 0 ; 
+                }
+
+            }
 
 
-            //         gpio_init(GPIOA,SWITCH_SPEAKER,GPIO_MODE_OUTPUT_PP_HIGH);
-            //         delay_us(10);
+            if (g_gpio_interrupt_flag_E_button ==1 ){
+                g_gpio_interrupt_flag_E_button = 0 ; 
+                if ( prevent_bouncing_E == prevent_bouncing_edge)
+                {   
 
-            //         uint8_t data[] = {1,2,3,4,5,6,7,8,9,10};
+                    printf(" E button pressed \n");
+                    gpio_init(GPIOA,SWITCH_SPEAKER,GPIO_MODE_OUTPUT_PP_HIGH);
+                    delay_us(10);
+                    if ( (gpio_read(GPIOA, BUSY_SPEAKER_2_PIN) == BUSY))
+                    {
 
-            //         memcpy(album,data,sizeof(data));
+                        printf(" pause \n");
+                        lam_gi_thi_lam(0x0E,0,0); //pause     
+                        what_kind_of_music_is_playing = REST_TYPE;               
+                    }
+                    else{
+                    uint8_t data[] = {1,2,3,4,5,6,0,0,0,0};
 
-            //         phat_nhac_theo_folder(album[current_song],2);
-
-            //         current_D_song ++;
-
-            //         if (current_D_song == 10 ){
-
-            //             current_D_song = 0 ; 
-            //         }
-            //         what_kind_of_music_is_playing = D_TYPE;
-            //         prevent_bouncing = 0 ; 
-            //     }
-
-            // }
-
-
-            // if (g_gpio_interrupt_flag_E_button ==1 ){
-            //     g_gpio_interrupt_flag_E_button = 0 ; 
-            //     if ( prevent_bouncing == prevent_bouncing_edge)
-            //     {
-            //         gpio_init(GPIOA,SWITCH_SPEAKER,GPIO_MODE_OUTPUT_PP_HIGH);
-            //         delay_us(10);
-            //         if ( (gpio_read(GPIOA, BUSY_SPEAKER_1_PIN) == BUSY))
-            //         {
-                   
-
-            //             lam_gi_thi_lam(0x0E,0,0); //pause
-                        
-
+                    memcpy(album,data,sizeof(data));
+                    phat_nhac_theo_folder(album[current_E_song],3);
+                    printf(" current song %d\n",album[current_E_song]);
+                    current_E_song++;
+                    if ( current_E_song ==6){
+                        current_E_song = 0 ; 
+                    }
                     
-            //         }
+                    what_kind_of_music_is_playing = E_TYPE;
+                    prevent_bouncing_E = 0 ; 
+                }
+            }
 
-            //         uint8_t data[] = {1,2,3,4,5,6,0,0,0,0};
-
-            //         memcpy(album,data,sizeof(data));
-            //         phat_nhac_theo_folder(current_E_song,3);
-            //         current_E_song++;
-            //         if ( current_E_song ==6){
-            //             current_E_song = 0 ; 
-            //         }
-                    
-            //         what_kind_of_music_is_playing = E_TYPE;
-            //         prevent_bouncing = 0 ; 
-            //     }
-
-            // }
+            }
 
 
-            if(prevent_bouncing < prevent_bouncing_edge)
-                prevent_bouncing ++;
+            if(prevent_bouncing_A < prevent_bouncing_edge)
+                prevent_bouncing_A ++;
+            
+            if(prevent_bouncing_B < prevent_bouncing_edge)
+                prevent_bouncing_B ++;
                 
+                if(prevent_bouncing_C < prevent_bouncing_edge)
+                prevent_bouncing_C ++;
+                
+
+
+                if(prevent_bouncing_D < prevent_bouncing_edge)
+                prevent_bouncing_D ++;
+                
+
+                if(prevent_bouncing_E < prevent_bouncing_edge)
+                prevent_bouncing_E ++;
+                
+
+
 
 
 
